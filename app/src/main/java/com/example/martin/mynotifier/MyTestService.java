@@ -32,6 +32,7 @@ public class MyTestService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate(); // if you override onCreate(), make sure to call super().
+        Log.d(this.getClass().getSimpleName(), "onReceive");
         // If a Context object is needed, call getApplicationContext() here.
         mNotificationManager =
                 (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
