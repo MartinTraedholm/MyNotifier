@@ -18,23 +18,29 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 
 //TODO lav følgende en app som måler strømforbruget i iven periode og sender det til uret
 
-public class MainSetupActivity extends AppCompatActivity {
+public class MainSetupActivity extends AppCompatActivity implements View.OnClickListener{
 
+    private AlarmManager alarmMgr;
+    private PendingIntent alarmIntent;
+    private Button btnClick;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_setup);
 
+        btnClick = (Button) findViewById(R.id.btnStartNotification) ;
+        btnClick.setOnClickListener(this);
+
         Log.i(this.getClass().getSimpleName(),"OnCreate");
 
-        //float thePhoneStatus = getBatteryLevel();
-        //fireSimpleDefaultPriorityNotification("Status", "Battery: " +Float.toString(thePhoneStatus)+"% test");
-        Log.d(this.getClass().getSimpleName(), "Before scheduleAlarm()" + Boolean.toString(isNotifierAllreadyRunning(getApplicationContext())));
-        scheduleAlarm();
-        Log.d(this.getClass().getSimpleName(), "After scheduleAlarm()" + Boolean.toString(isNotifierAllreadyRunning(getApplicationContext())));
+        //to make isNotifierAllreadyRunning2 return false you need to uninstal the app!!
+        Log.d(this.getClass().getSimpleName(), "Before scheduleAlarm()" + Boolean.toString(isNotifierAllreadyRunning2(getApplicationContext())));
+        scheduleAlarm2(getApplicationContext(), false);
+        Log.d(this.getClass().getSimpleName(), "After scheduleAlarm()" + Boolean.toString(isNotifierAllreadyRunning2(getApplicationContext())));
     }
 
     @Override
@@ -55,40 +61,46 @@ public class MainSetupActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
-    public void scheduleAlarm() {
-        if(false == isNotifierAllreadyRunning(getApplicationContext())) {
-            // Construct an intent that will execute the AlarmReceiver
-            Intent intent = new Intent(getApplicationContext(), MyAlarmReceiver.class);
-            // Create a PendingIntent to be triggered when the alarm goes off
-            final PendingIntent pIntent = PendingIntent.getBroadcast(this, MyAlarmReceiver.REQUEST_CODE,
-                    intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            // Setup periodic alarm every 5 seconds
-            long firstMillis = System.currentTimeMillis(); // alarm is set right away
-            AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-            // First parameter is the type: ELAPSED_REALTIME, ELAPSED_REALTIME_WAKEUP, RTC_WAKEUP
-            // Interval can be INTERVAL_FIFTEEN_MINUTES, INTERVAL_HALF_HOUR, INTERVAL_HOUR, INTERVAL_DAY
-            alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, firstMillis,
-                    AlarmManager.INTERVAL_HALF_HOUR, pIntent);
+    @Override
+    public void onClick(View v) {
+        if( v.getId() == R.id.btnStartNotification)
+        {
+            Log.d(getApplicationContext().getClass().getSimpleName(), "btnStartNotification press");
         }
     }
 
-    public void cancelAlarm() {
-        Intent intent = new Intent(getApplicationContext(), MyAlarmReceiver.class);
-        final PendingIntent pIntent = PendingIntent.getBroadcast(this, MyAlarmReceiver.REQUEST_CODE,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-        alarm.cancel(pIntent);
+    public void scheduleAlarm2(Context context, boolean forceUpdate)
+    {
+        Log.d(context.getClass().getSimpleName(), "scheduleAlarm2");
+        Log.d(context.getClass().getSimpleName(), "scheduleAlarm2, forse update:" + forceUpdate);
+
+        if(isNotifierAllreadyRunning2(getApplicationContext()) || forceUpdate) {
+            alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(context, MyAlarmReceiver.class);
+            alarmIntent = PendingIntent.getBroadcast(context, MyAlarmReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+                    AlarmManager.INTERVAL_HALF_HOUR, alarmIntent);
+        }
     }
 
-    public boolean isNotifierAllreadyRunning(Context context)
+    public void cancelAlarm2()
     {
-        boolean alarmUp = (PendingIntent.getBroadcast(context, 0,
-                new Intent(context, MyAlarmReceiver.class),
-                PendingIntent.FLAG_NO_CREATE) != null);
+        if(alarmMgr != null)
+        {
+            alarmMgr.cancel(alarmIntent);
+        }
+    }
+
+    public boolean isNotifierAllreadyRunning2(Context context)
+    {
+        boolean alarmUp = (PendingIntent.getBroadcast(  context,MyAlarmReceiver.REQUEST_CODE,
+                                                        new Intent(context, MyAlarmReceiver.class), PendingIntent.FLAG_NO_CREATE) != null);
         return alarmUp;
     }
+
+
 }
