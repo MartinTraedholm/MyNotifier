@@ -1,19 +1,11 @@
 package com.example.martin.mynotifier;
 
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.BatteryManager;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v4.app.NotificationCompat;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -26,21 +18,25 @@ public class MainSetupActivity extends AppCompatActivity implements View.OnClick
 
     private AlarmManager alarmMgr;
     private PendingIntent alarmIntent;
-    private Button btnClick;
+    private Button btnClickStartNotification;
+    private Button btnClickStopNotification;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_setup);
 
-        btnClick = (Button) findViewById(R.id.btnStartNotification) ;
-        btnClick.setOnClickListener(this);
+        btnClickStartNotification = (Button) findViewById(R.id.btnStartNotification) ;
+        btnClickStartNotification.setOnClickListener(this);
+
+        btnClickStopNotification = (Button) findViewById(R.id.btnStopNotification) ;
+        btnClickStopNotification.setOnClickListener(this);
 
         Log.i(this.getClass().getSimpleName(),"OnCreate");
 
-        //to make isNotifierAllreadyRunning2 return false you need to uninstal the app!!
-        Log.d(this.getClass().getSimpleName(), "Before scheduleAlarm()" + Boolean.toString(isNotifierAllreadyRunning2(getApplicationContext())));
-        scheduleAlarm2(getApplicationContext(), false);
-        Log.d(this.getClass().getSimpleName(), "After scheduleAlarm()" + Boolean.toString(isNotifierAllreadyRunning2(getApplicationContext())));
+        //to make isNotifierAllreadyRunning return false you need to uninstal the app!!
+        Log.d(this.getClass().getSimpleName(), "Before scheduleAlarm()" + Boolean.toString(isNotifierAllreadyRunning(getApplicationContext())));
+        scheduleAlarm(getApplicationContext(), false);
+        Log.d(this.getClass().getSimpleName(), "After scheduleAlarm()" + Boolean.toString(isNotifierAllreadyRunning(getApplicationContext())));
     }
 
     @Override
@@ -66,18 +62,26 @@ public class MainSetupActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     public void onClick(View v) {
+        Log.d(getApplicationContext().getClass().getSimpleName(),"onClick callback ");
         if( v.getId() == R.id.btnStartNotification)
         {
             Log.d(getApplicationContext().getClass().getSimpleName(), "btnStartNotification press");
+            scheduleAlarm(getApplicationContext(), true);
+        }
+
+        if( v.getId() == R.id.btnStopNotification)
+        {
+            Log.d(getApplicationContext().getClass().getSimpleName(), "btnStopNotification press");
+            cancelAlarm();
         }
     }
 
-    public void scheduleAlarm2(Context context, boolean forceUpdate)
+    public void scheduleAlarm(Context context, boolean forceUpdate)
     {
-        Log.d(context.getClass().getSimpleName(), "scheduleAlarm2");
-        Log.d(context.getClass().getSimpleName(), "scheduleAlarm2, forse update:" + forceUpdate);
+        Log.d(context.getClass().getSimpleName(), "scheduleAlarm");
+        Log.d(context.getClass().getSimpleName(), "scheduleAlarm, forse update:" + forceUpdate);
 
-        if(isNotifierAllreadyRunning2(getApplicationContext()) || forceUpdate) {
+        if(false == isNotifierAllreadyRunning(getApplicationContext()) || true == forceUpdate) {
             alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             Intent intent = new Intent(context, MyAlarmReceiver.class);
             alarmIntent = PendingIntent.getBroadcast(context, MyAlarmReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -87,15 +91,18 @@ public class MainSetupActivity extends AppCompatActivity implements View.OnClick
         }
     }
 
-    public void cancelAlarm2()
+    public void cancelAlarm()
     {
+        //BUG here!! investigate
+        Log.d(getApplicationContext().getClass().getSimpleName(), "cancelAlarm");
         if(alarmMgr != null)
         {
+            Log.d(getApplicationContext().getClass().getSimpleName(), "cancelAlarm, it will cancel");
             alarmMgr.cancel(alarmIntent);
         }
     }
 
-    public boolean isNotifierAllreadyRunning2(Context context)
+    public boolean isNotifierAllreadyRunning(Context context)
     {
         boolean alarmUp = (PendingIntent.getBroadcast(  context,MyAlarmReceiver.REQUEST_CODE,
                                                         new Intent(context, MyAlarmReceiver.class), PendingIntent.FLAG_NO_CREATE) != null);
