@@ -7,7 +7,9 @@ import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.BatteryManager;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
@@ -43,6 +45,8 @@ public class MyTestService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         // Do the task here
         Log.i(this.getClass().getSimpleName(), "Service running test!!!!!");
+        float batteryNow = getBatteryLevel();
+        float batteryLastStatus;
         GregorianCalendar gc = new GregorianCalendar();
 
         GregorianCalendar gcAfter = (GregorianCalendar) gc.clone();
@@ -52,6 +56,14 @@ public class MyTestService extends IntentService {
         GregorianCalendar gcBefore = (GregorianCalendar) gc.clone();
         gcBefore.set(Calendar.HOUR_OF_DAY,7);
         gcBefore.set(Calendar.MINUTE,0);
+
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putFloat("lastBatteryStatus",batteryNow);
+        editor.commit();
 
 
         Date timeNow = gc.getTime();

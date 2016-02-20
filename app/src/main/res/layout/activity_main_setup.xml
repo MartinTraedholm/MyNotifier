@@ -13,7 +13,8 @@
     android:layout_height="match_parent"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:weightSum="1">
 
     <Button
         android:layout_width="match_parent"
@@ -28,6 +29,22 @@
         style="@style/Base.Widget.AppCompat.Button"
         android:id="@+id/btnStartNotification"
         android:text="Start Notification" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/txtStatusNotifier"
+        android:textSize="20dp"
+        android:layout_gravity="center_horizontal" />
+
+    <ImageView
+        android:layout_width="62dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/imgStatus"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.18"
+        android:src="#a65b5b" />
 
 
 </LinearLayout>

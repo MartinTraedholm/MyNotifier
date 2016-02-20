@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 //TODO lav følgende en app som måler strømforbruget i iven periode og sender det til uret
 
@@ -20,8 +22,11 @@ public class MainSetupActivity extends AppCompatActivity implements View.OnClick
     private PendingIntent alarmIntent;
     private Button btnClickStartNotification;
     private Button btnClickStopNotification;
+    private TextView txtStatusText;
+    private ImageView imageViewStatusNotification;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(this.getClass().getSimpleName(),"OnCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_setup);
 
@@ -31,12 +36,13 @@ public class MainSetupActivity extends AppCompatActivity implements View.OnClick
         btnClickStopNotification = (Button) findViewById(R.id.btnStopNotification) ;
         btnClickStopNotification.setOnClickListener(this);
 
-        Log.i(this.getClass().getSimpleName(),"OnCreate");
+        //--------------------
+        // This is not used only to init
+        setTextStatusNotification("status for notifier is unknown :( "); //should be overide rigth away!!
+        setStatusChange();
+        //--------------------
 
-        //to make isNotifierAllreadyRunning return false you need to uninstal the app!!
-        Log.d(this.getClass().getSimpleName(), "Before scheduleAlarm()" + Boolean.toString(isNotifierAllreadyRunning(getApplicationContext())));
         scheduleAlarm(getApplicationContext(), false);
-        Log.d(this.getClass().getSimpleName(), "After scheduleAlarm()" + Boolean.toString(isNotifierAllreadyRunning(getApplicationContext())));
     }
 
     @Override
@@ -62,7 +68,7 @@ public class MainSetupActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     public void onClick(View v) {
-        Log.d(getApplicationContext().getClass().getSimpleName(),"onClick callback ");
+        Log.d(getApplicationContext().getClass().getSimpleName(), "onClick callback ");
         if( v.getId() == R.id.btnStartNotification)
         {
             Log.d(getApplicationContext().getClass().getSimpleName(), "btnStartNotification press");
@@ -72,7 +78,7 @@ public class MainSetupActivity extends AppCompatActivity implements View.OnClick
         if( v.getId() == R.id.btnStopNotification)
         {
             Log.d(getApplicationContext().getClass().getSimpleName(), "btnStopNotification press");
-            cancelAlarm();
+            cancelAlarm(getApplicationContext());
         }
     }
 
@@ -89,17 +95,24 @@ public class MainSetupActivity extends AppCompatActivity implements View.OnClick
             alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
                     AlarmManager.INTERVAL_HALF_HOUR, alarmIntent);
         }
+        setStatusChange();
     }
 
-    public void cancelAlarm()
+    public void cancelAlarm(Context context)
     {
-        //BUG here!! investigate
-        Log.d(getApplicationContext().getClass().getSimpleName(), "cancelAlarm");
-        if(alarmMgr != null)
+        Log.d(context.getClass().getSimpleName(), "cancelAlarm");
+        if(null == alarmMgr)
         {
-            Log.d(getApplicationContext().getClass().getSimpleName(), "cancelAlarm, it will cancel");
-            alarmMgr.cancel(alarmIntent);
+            alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         }
+        Intent intent = new Intent(context, MyAlarmReceiver.class);
+        alarmIntent = PendingIntent.getBroadcast(context, MyAlarmReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        if(alarmIntent != null)
+        {
+            alarmMgr.cancel(alarmIntent);
+            alarmIntent.cancel();
+        }
+        setStatusChange();
     }
 
     public boolean isNotifierAllreadyRunning(Context context)
@@ -107,6 +120,39 @@ public class MainSetupActivity extends AppCompatActivity implements View.OnClick
         boolean alarmUp = (PendingIntent.getBroadcast(  context,MyAlarmReceiver.REQUEST_CODE,
                                                         new Intent(context, MyAlarmReceiver.class), PendingIntent.FLAG_NO_CREATE) != null);
         return alarmUp;
+    }
+
+    private void setStatusChange()
+    {
+        if(isNotifierAllreadyRunning(getApplicationContext()))
+        {
+            Log.d(getApplicationContext().getClass().getSimpleName(), "setStatusChange: Running!");
+            setImageNotificationGreenButton();
+            setTextStatusNotification("Running");
+        }
+        else
+        {
+            Log.d(getApplicationContext().getClass().getSimpleName(), "setStatusChange: Not running!");
+            setTextStatusNotification("Not running");
+            setImageNotificationRedButton();
+        }
+    }
+
+    private void setImageNotificationRedButton()
+    {
+        imageViewStatusNotification = (ImageView) findViewById(R.id.imgStatus);
+        imageViewStatusNotification.setImageResource(R.mipmap.red_button2);
+    }
+
+    private void setImageNotificationGreenButton()
+    {
+        imageViewStatusNotification = (ImageView) findViewById(R.id.imgStatus);
+        imageViewStatusNotification.setImageResource(R.mipmap.green_button2);
+    }
+    private void setTextStatusNotification(String text)
+    {
+        txtStatusText = (TextView) findViewById(R.id.txtStatusNotifier);
+        txtStatusText.setText(text);
     }
 
 
