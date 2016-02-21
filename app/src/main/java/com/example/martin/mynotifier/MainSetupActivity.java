@@ -88,6 +88,7 @@ public class MainSetupActivity extends AppCompatActivity implements View.OnClick
         Log.d(context.getClass().getSimpleName(), "scheduleAlarm, forse update:" + forceUpdate);
 
         if(false == isNotifierAllreadyRunning(getApplicationContext()) || true == forceUpdate) {
+            Log.d(context.getClass().getSimpleName(),"Start alarm");
             alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             Intent intent = new Intent(context, MyAlarmReceiver.class);
             alarmIntent = PendingIntent.getBroadcast(context, MyAlarmReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);

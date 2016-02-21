@@ -28,7 +28,7 @@ public class MyTestService extends IntentService {
     public MyTestService() {
         super("MyTestService");
     }
-
+    private MyPreferences prefs;
     private NotificationManager mNotificationManager;
     private static final int simpleDefaultPriorityNotificationID = 12;
     @Override
@@ -38,7 +38,7 @@ public class MyTestService extends IntentService {
         // If a Context object is needed, call getApplicationContext() here.
         mNotificationManager =
                 (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
-
+        prefs = new MyPreferences(getApplicationContext());
     }
 
     @Override
@@ -46,7 +46,13 @@ public class MyTestService extends IntentService {
         // Do the task here
         Log.i(this.getClass().getSimpleName(), "Service running test!!!!!");
         float batteryNow = getBatteryLevel();
-        float batteryLastStatus;
+        float batteryLastStatus = -1;
+        Object o = prefs.get(MyPreferences.MY_PREFS_LAST_BATERRY_LEVEL);
+        if(prefs != null && o != null)
+            batteryLastStatus = (float)o;
+
+        Log.d(this.getClass().getSimpleName(), "batteryLastStatus " + batteryLastStatus);
+
         GregorianCalendar gc = new GregorianCalendar();
 
         GregorianCalendar gcAfter = (GregorianCalendar) gc.clone();
@@ -58,18 +64,17 @@ public class MyTestService extends IntentService {
         gcBefore.set(Calendar.MINUTE,0);
 
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putFloat("lastBatteryStatus",batteryNow);
-        editor.commit();
+        //TODO use com.example.martin.mynotifier.MyPreferences.java
+        //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        //SharedPreferences.Editor editor = preferences.edit();
+        //editor.putFloat("lastBatteryStatus",batteryNow);
+        //editor.commit();
 
 
         Date timeNow = gc.getTime();
         Date timeAfter = gcAfter.getTime();
         Date timeBefore = gcBefore.getTime();
-        Log.i(this.getClass().getSimpleName(),timeNow.toString() + " After: " + timeAfter.toString() + "Before: " + timeBefore.toString());
+        Log.d(this.getClass().getSimpleName(),timeNow.toString() + " After: " + timeAfter.toString() + "Before: " + timeBefore.toString());
         if(timeNow.before(timeAfter) && timeNow.after(timeBefore))
             fireSimpleDefaultPriorityNotification("Status", "Battery: " + Float.toString(getBatteryLevel()) + "% test");
     }
