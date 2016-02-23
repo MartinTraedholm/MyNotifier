@@ -4,10 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by Martin on 20/02/2016.
  */
+
+
 public class MyPreferences
 {
     public static final String MY_PREF = "com.example.martin.mynotifier.MyPreferences";
@@ -32,15 +35,23 @@ public class MyPreferences
         this.editor.commit();
         return true;
     }
-    public Object get(String key) {
-        Map s = this.sharedPreferences.getAll();
-        Object o = s.get(key);
-        Object val = null;
+    public Object get(String key, Object defaultVal) {
+        Map getAllSharedPrefs = this.sharedPreferences.getAll();
+        Object returnVal = null;
+        if(false == this.sharedPreferences.contains(key))
+        {
+            if(false == setObject(key, defaultVal))
+                return returnVal;
+        }
+        Object o = getAllSharedPrefs.get(key);
+
         if(o instanceof String)
-            val = this.sharedPreferences.getString(key,"Default value");
-        else if(o instanceof Float)
-            val = this.sharedPreferences.getFloat(key,-1);
-        return val;
+        {
+            returnVal = this.sharedPreferences.getString(key, "Error!!");
+        }else if(o instanceof Float)
+        {
+            returnVal = this.sharedPreferences.getFloat(key, -1);
+        }return returnVal;
     }
 
     public void clear(String key) {
