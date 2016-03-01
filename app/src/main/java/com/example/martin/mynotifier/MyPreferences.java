@@ -2,6 +2,7 @@ package com.example.martin.mynotifier;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import java.util.Map;
 import java.util.Objects;
@@ -15,14 +16,17 @@ public class MyPreferences
 {
     public static final String MY_PREF = "com.example.martin.mynotifier.MyPreferences";
     public static final String MY_PREFS_LAST_BATERRY_LEVEL = "com.example.martin.mynotifier.MyPreferences.lastBaterryLevel";
+
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     public MyPreferences(Context context)
     {
+        Log.d(this.getClass().getSimpleName(), "MyPreference constructor, context: " + context.toString());
         this.sharedPreferences = context.getSharedPreferences(MY_PREF,0);
         this.editor = this.sharedPreferences.edit();
     }
     public <T> boolean setObject(String key, T value ) {
+        Log.d(this.getClass().getSimpleName(),"setObject: key: "+ key + " Object: " + value.toString());
         if(value instanceof String){
             this.editor.putString(key, (String)value);
         }else if( value instanceof Boolean){
@@ -32,10 +36,12 @@ public class MyPreferences
         }else{
             return false;
         }
+
         this.editor.commit();
         return true;
     }
     public Object get(String key, Object defaultVal) {
+        Log.d(this.getClass().getSimpleName(), "get: key: " + key + " defaultVal: " + defaultVal.toString());
         Map getAllSharedPrefs = this.sharedPreferences.getAll();
         Object returnVal = null;
         if(false == this.sharedPreferences.contains(key))
@@ -51,7 +57,9 @@ public class MyPreferences
         }else if(o instanceof Float)
         {
             returnVal = this.sharedPreferences.getFloat(key, -1);
-        }return returnVal;
+        }
+        Log.d(this.getClass().getSimpleName(), "get: key: " + key + " Object: " + ((returnVal != null) ? returnVal.toString() : "null"));
+        return returnVal;
     }
 
     public void clear(String key) {

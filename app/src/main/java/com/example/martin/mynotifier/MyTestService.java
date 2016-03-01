@@ -17,6 +17,7 @@ import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -47,7 +48,7 @@ public class MyTestService extends IntentService {
         Log.i(this.getClass().getSimpleName(), "Service running test!!!!!");
         float batteryNow = getBatteryLevel();
         float batteryLastStatus = -1;
-        Object o = prefs.get(MyPreferences.MY_PREFS_LAST_BATERRY_LEVEL);
+        Object o = prefs.get(MyPreferences.MY_PREFS_LAST_BATERRY_LEVEL,-1);
         if(prefs != null && o != null)
             batteryLastStatus = (float)o;
 
@@ -64,19 +65,14 @@ public class MyTestService extends IntentService {
         gcBefore.set(Calendar.MINUTE,0);
 
 
-        //TODO use com.example.martin.mynotifier.MyPreferences.java
-        //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        //SharedPreferences.Editor editor = preferences.edit();
-        //editor.putFloat("lastBatteryStatus",batteryNow);
-        //editor.commit();
-
 
         Date timeNow = gc.getTime();
         Date timeAfter = gcAfter.getTime();
         Date timeBefore = gcBefore.getTime();
         Log.d(this.getClass().getSimpleName(),timeNow.toString() + " After: " + timeAfter.toString() + "Before: " + timeBefore.toString());
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
         if(timeNow.before(timeAfter) && timeNow.after(timeBefore))
-            fireSimpleDefaultPriorityNotification("Status", "Battery: " + Float.toString(getBatteryLevel()) + "% test");
+            fireSimpleDefaultPriorityNotification("Battery","Time: " + sdf.format(timeNow) + " Bat: " + Float.toString(batteryNow));
     }
 
     private void fireSimpleDefaultPriorityNotification(String notificationTitle, String contentText)

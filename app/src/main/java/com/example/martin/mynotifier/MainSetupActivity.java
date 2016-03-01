@@ -42,7 +42,7 @@ public class MainSetupActivity extends AppCompatActivity implements View.OnClick
         setStatusChange();
         //--------------------
 
-        scheduleAlarm(getApplicationContext(), false);
+        //scheduleAlarm(getApplicationContext(), false);
     }
 
     @Override
