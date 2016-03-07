@@ -43,6 +43,11 @@ public class MainSetupActivity extends AppCompatActivity implements View.OnClick
         //--------------------
 
         //scheduleAlarm(getApplicationContext(), false);
+
+        //Test af JSON
+        MyJsonFileHelpers testAfJson = new MyJsonFileHelpers();
+        testAfJson.writeJsonToFile(getApplicationContext());
+
     }
 
     @Override
